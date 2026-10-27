@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Portfolio</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600&family=Great+Vibes&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="src/styles/theme.css"><link rel="stylesheet" href="src/styles/main.css">
+</head><body>
+<nav id="nav"><a class="logo" href="#top">YourName</a><div class="links"><a href="#work">Work</a><a href="#designs">Designs</a><a href="#about">About</a><a class="btn-pill" href="#contact" id="navcta">✦ Contact me</a></div></nav>
+<a class="wa" id="wa" aria-label="WhatsApp">✆</a>
+
+<header class="hero" id="top">
+ <div class="corner c1" data-k="0"></div><div class="corner c2" data-k="1"></div><div class="corner c3" data-k="2"></div><div class="corner c4" data-k="3"></div>
+ <div class="badge" id="badge" tabindex="0" aria-label="ID badge, hover or press to flip">
+  <div class="strap"></div><div class="ring"></div><div class="plug"></div>
+  <div class="badge-in">
+  <div class="face front"><span class="slot"></span><div class="paper"><div class="shot"><div class="ph" id="badgePhoto" style="background:none;position:absolute;inset:0">Profile photo</div><span class="mini" id="badgeMini"></span><span class="globe"></span></div><div class="info"><div class="l"><div><h3 id="badgeName"></h3><p id="badgeRole"></p></div><span class="avail" id="badgeAvail"></span></div><div class="r"><div id="badgeSig"></div><div><div class="barcode"></div><small id="badgeId"></small></div></div></div></div></div>
+  <div class="face back"><span class="slot"></span><div class="paper bk"><h4>What I do</h4><div id="badgeRows" style="display:grid;gap:3cqw"></div><div class="cardtag" id="badgeTag"></div><div class="foot"><small id="badgeHandle"></small><div class="barcode"></div></div></div></div>
+ </div></div>
+ <div class="typed" id="typed1"></div><div class="scroll">Scroll</div>
+</header>
+
+<section class="intro" id="intro">
+ <div class="collage rv"><div class="p ph" id="introPhoto">Portrait photo</div><div class="sig" id="sig"></div><div class="t ph" id="introShot">Screenshot</div></div>
+ <div><h2 class="cur" id="introH"></h2><p class="rv" id="introP"></p></div>
+</section>
+
+<section class="roles" id="roles"></section>
+
+<section class="stats" id="stats"></section>
+<div class="marquee"><div id="mq"></div></div>
+
+<section class="work" id="work"><h2 class="rv">Selected work</h2><p class="sub rv" id="workSub"></p><div class="track" id="track"></div></section>
+
+<section class="designs" id="designs"><h2 class="rv">Designs</h2><p class="sub rv" id="designsSub"></p><div id="designList"></div></section>
+
+<section class="about" id="about">
+ <div class="pic ph rv" id="aboutPhoto">About photo</div>
+ <div class="rv"><h2>About me</h2><span class="tag" id="aboutTag"></span><p id="aboutP"></p><ul id="aboutList"></ul></div>
+</section>
+
+<section class="contact" id="contact">
+ <div><h2 class="rv" id="cta"></h2><div class="btns"><a class="b fill" id="mail">Contact me ↗</a><a class="b" id="quote">Get a quote ↗</a></div></div>
+ <footer><span id="copy"></span><span><a id="resume" href="#">Resume</a> · <a id="social" href="#">Social</a></span></footer>
+</section>
+
+<script src="src/data/portfolio.js"></script>
+<script src="src/main.js"></script>
+</body></html>
