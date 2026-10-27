@@ -1,0 +1,2 @@
+{ "name": "my-portfolio", "version": "1.0.0", "private": true,
+  "scripts": { "dev": "node serve.js", "build": "node build.js", "preview": "node build.js && node serve.js dist" } }
