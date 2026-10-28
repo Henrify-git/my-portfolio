@@ -21,6 +21,6 @@ else{
 }
 if(errs.length){console.error('\nBUILD FAILED\n - '+errs.join('\n - '));process.exit(1)}
 fs.rmSync(dist,{recursive:true,force:true});fs.mkdirSync(dist);
-['index.html','design.html','src','public'].forEach(p=>{const s=path.join(root,p);if(fs.existsSync(s))fs.cpSync(s,path.join(dist,p),{recursive:true});else console.log('Note: "'+p+'" not found, skipped')});
+['index.html','design.html','admin','src','public','supabase'].forEach(p=>{const s=path.join(root,p);if(fs.existsSync(s))fs.cpSync(s,path.join(dist,p),{recursive:true});else console.log('Note: "'+p+'" not found, skipped')});
 console.log(`Build OK: ${(P.designs||[]).length} designs, ${(P.projects||[]).length} projects -> dist/`);
 if(warns.length)console.log(`\n${warns.length} image warning(s):\n - `+warns.join('\n - '));

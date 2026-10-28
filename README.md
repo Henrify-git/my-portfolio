@@ -4,6 +4,8 @@ No frameworks, no `npm install`, no coding knowledge needed. You edit **one cont
 
 > **Why not Next.js / TypeScript?** The design was already plain HTML/CSS/JS. Keeping it that way means nothing can break from a failed install, any host can serve it, and your content file is simple to edit. The layout is untouched.
 
+> **Admin dashboard:** to edit everything at `/admin` instead of in files, follow `docs/CMS-SETUP.md`. Until then, everything below still works.
+
 ## Where things live
 | I want to change… | Edit this file |
 |---|---|
