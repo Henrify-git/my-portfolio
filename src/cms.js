@@ -2,7 +2,8 @@
    merges it over src/data/portfolio.js, then starts the page. If anything fails
    (no config, offline, timeout) the site shows the built-in content instead. */
 (function(){
-  const C=window.CMS_CONFIG||{},next=document.currentScript.dataset.next,$=s=>document.querySelector(s);
+  const C=window.CMS_CONFIG||{};try{if(C.url)C.url=new URL(String(C.url).trim()).origin}catch(e){C.url=''}C.anonKey=String(C.anonKey||'').trim();
+  const next=document.currentScript.dataset.next,$=s=>document.querySelector(s);
   let S={};
   const start=()=>{const s=document.createElement('script');s.src=next;s.onload=late;document.body.appendChild(s)};
   if(!C.url||!C.anonKey)return start();
@@ -18,6 +19,8 @@
       P.stats=stats.map(s=>[s.value,s.label]);P.tools=tools.map(t=>t.name);
       P.projects=projects.map(x=>({n:x.name,k:x.category,img:x.image_url,url:x.url||'#',tall:x.tall?1:0}));
       P.designs=designs.map(x=>({slug:x.slug,name:x.name,kind:x.kind,summary:x.summary,image:x.image_url,role:x.role,year:x.year,tools:x.tools,liveUrl:x.live_url,liveLabel:x.live_label,story:x.story||[]}));
+      const L=S.labels||{},ib={emailLabel:'btn_email',linkedinLabel:'btn_linkedin',linkedinUrl:'url_linkedin',calendlyLabel:'btn_calendly',calendlyUrl:'url_calendly'};
+      P.introButtons=P.introButtons||{};for(const k in ib)if(L[ib[k]]!=null)P.introButtons[k]=L[ib[k]];
       early();
     }else S={};
   }).catch(e=>{console.warn('CMS unavailable, using built-in content:',e.message);S={}}).finally(start);

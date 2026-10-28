@@ -50,3 +50,8 @@ function onScroll(){const y=scrollY,h=innerHeight;nav.classList.toggle('hide',y<
 addEventListener('scroll',onScroll,{passive:true});onScroll();
 $('#badge').addEventListener('click',()=>$('#badge').classList.toggle('flip'));
 $('#badge').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();$('#badge').classList.toggle('flip')}});
+
+/* Intro buttons under the headline. Email uses CONFIG.email; LinkedIn/Calendly show only when a link is set. */
+(function(){const B=CONFIG.introButtons||{},box=$('#introBtns');if(!box)return;
+ const items=[['email',CONFIG.email?'mailto:'+CONFIG.email:'',B.emailLabel||'Email me','\u2709'],['linkedin',B.linkedinUrl,B.linkedinLabel||'LinkedIn','in'],['calendly',B.calendlyUrl,B.calendlyLabel||'Book a call','\u25F7']].filter(x=>x[1]);
+ box.innerHTML=items.map(([k,u,l,i])=>`<a class="ibtn ${k}" href="${u}" ${k==='email'?'':'target="_blank" rel="noopener"'}><span aria-hidden="true">${i}</span>${l}</a>`).join('')})();
