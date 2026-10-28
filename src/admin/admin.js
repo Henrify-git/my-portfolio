@@ -2,7 +2,8 @@
    the engine under it (forms, lists, uploads, saving) is generic. Security does NOT depend
    on this file: Supabase Row Level Security rejects every write from a non-admin. */
 (function(){
-const C=window.CMS_CONFIG||{},$=(s,e=document)=>e.querySelector(s),$$=(s,e=document)=>[...e.querySelectorAll(s)];
+const C=window.CMS_CONFIG||{};try{if(C.url)C.url=new URL(String(C.url).trim()).origin}catch(e){C.url=''}C.anonKey=String(C.anonKey||'').trim();
+const $=(s,e=document)=>e.querySelector(s),$$=(s,e=document)=>[...e.querySelectorAll(s)];
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const html=h=>{const t=document.createElement('template');t.innerHTML=h.trim();return t.content.firstElementChild};
 const abs=u=>!u||/^(https?:|data:|\/)/.test(u)?u:'/'+u;
@@ -39,6 +40,7 @@ const SECTIONS={
  resume:{title:'Resume and Documents',blocks:[{kind:'single',table:'profile',title:'Resume',fields:[{k:'resume_url',l:'Resume file (PDF)',t:'file',folder:'resume',h:'The footer “Resume” link points here. Upload a new PDF to replace it.'}]},{kind:'media'}]},
  contact:{title:'Social Links and Contact',blocks:[
   {kind:'single',table:'profile',title:'Contact',fields:[T('email','Email',{r:1,t:'email'}),T('whatsapp','WhatsApp / chat link',{t:'url'}),T('social','Fallback social link',{t:'url'})]},
+  {kind:'single',table:'site_settings',title:'Intro buttons (under the headline)',help:'The Email button uses your email above. Leave a link empty to hide that button.',fields:[T('labels.btn_email','Email button text',{h:'Default: Email me'}),T('labels.btn_linkedin','LinkedIn button text',{h:'Default: LinkedIn'}),T('labels.url_linkedin','LinkedIn profile URL',{t:'url',h:'https://www.linkedin.com/in/your-name'}),T('labels.btn_calendly','Calendly button text',{h:'Default: Book a call'}),T('labels.url_calendly','Calendly booking link',{t:'url',h:'https://calendly.com/your-name/30min'})]},
   {kind:'list',table:'social_links',title:'Social links (shown in footer)',tk:'label',fields:[T('label','Name (LinkedIn, X, GitHub…)',{r:1}),T('url','URL',{t:'url',r:1})]}]},
  appearance:{title:'Website Appearance',blocks:[
   {kind:'single',table:'site_settings',title:'Colors',theme:1,fields:[['hero-dark','Hero / dark sections'],['hero-light','Hero glow and button hover'],['surface','Light section background'],['surface-2','Light section gradient end'],['surface-strong','Hero floating words'],['surface-light','Designs section background'],['ink','Headings and buttons'],['text','Body text'],['accent','Accent'],['accent-bright','Accent (on dark)'],['highlight','Highlight (strip dots, focus)']].map(([k,l])=>({k:'theme.'+k,l,t:'color'}))},
@@ -58,7 +60,7 @@ function ctl(f,v){
  case 'area':c=`<textarea id="${id}" rows="3">${esc(v)}</textarea>`;break;
  case 'list':c=`<textarea id="${id}" rows="4">${esc((v||[]).join('\n'))}</textarea>`;break;
  case 'paras':c=`<textarea id="${id}" rows="5">${esc([].concat(v||[]).join('\n\n'))}</textarea>`;break;
- case 'color':c=`<input id="${id}" type="color" value="${esc(v||'#000000')}">`;break;
+ case 'color':{const d=v||(f.k.startsWith('theme.')?getComputedStyle(document.documentElement).getPropertyValue('--'+f.k.slice(6)).trim():'')||'#5aa2ff';c=`<input id="${id}" type="color" value="${esc(d)}">`;break}
  case 'img':case 'file':c=`<div class="img" data-folder="${f.folder||'misc'}" data-kind="${f.t}">${f.t==='img'?`<img alt="" ${v?`src="${esc(abs(v))}"`:''}>`:`<a ${v?`href="${esc(abs(v))}"`:''} target="_blank">${v?'Current file':'No file yet'}</a>`}<input type="hidden" value="${esc(v)}"><input type="file" accept="${f.t==='img'?'image/jpeg,image/png,image/webp,image/gif':'application/pdf'}"><button type="button" class="ic" data-clear>Remove</button><span class="st"></span></div>`;break;
  case 'rep':reps[f.k]=f;c=`<div class="rep">${(v||[]).map(x=>repi(f,x)).join('')}</div><button type="button" class="btn" data-addrep>+ Add chapter</button>`;break;
  default:c=`<input id="${id}" type="${f.t==='email'?'email':'text'}" value="${esc(v)}">`}
