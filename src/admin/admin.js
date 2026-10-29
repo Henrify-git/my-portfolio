@@ -6,6 +6,7 @@ const C=window.CMS_CONFIG||{};try{if(C.url)C.url=new URL(String(C.url).trim()).o
 const $=(s,e=document)=>e.querySelector(s),$$=(s,e=document)=>[...e.querySelectorAll(s)];
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const html=h=>{const t=document.createElement('template');t.innerHTML=h.trim();return t.content.firstElementChild};
+const isVid=u=>/\.(mp4|webm)(\?.*)?$/i.test(u||'');
 const abs=u=>!u||/^(https?:|data:|\/)/.test(u)?u:'/'+u;
 const app=$('#app');let sb,dirty=false,me;
 const toast=(m,t='ok')=>{const e=html(`<div class="toast ${t}">${esc(m)}</div>`);$('#toasts').append(e);setTimeout(()=>e.remove(),5000)};
@@ -25,7 +26,7 @@ const SECTIONS={
   I('profile_photo','Profile picture (ID badge)','profile'),I('intro_photo','Hero image','profile'),I('intro_shot','Hero screenshot','profile'),A('cta','Closing call-to-action heading')]}]},
  projects:{title:'Projects',blocks:[
   {kind:'single',table:'profile',title:'Section subtitle',fields:[T('work_sub','Subtitle under “Selected work”')]},
-  {kind:'list',table:'projects',title:'Projects (sliding cards)',tk:'name',pub:1,fields:[T('name','Title',{r:1}),T('category','Category'),I('image_url','Cover image','projects'),T('url','Project link',{t:'url'}),B('tall','Phone-shaped card')]}]},
+  {kind:'list',table:'projects',title:'Projects (sliding cards)',tk:'name',pub:1,fields:[T('name','Title',{r:1}),T('category','Category'),{k:'image_url',l:'Cover image or video',t:'media',folder:'projects',h:'Image (JPG, PNG, WebP, GIF) or video (MP4, WebM). Maximum 10 MB each. Videos play muted on a loop.'},T('url','Project link',{t:'url'}),B('tall','Phone-shaped card')]}]},
  designs:{title:'Designs and Gallery',blocks:[
   {kind:'single',table:'profile',title:'Section subtitle',fields:[T('designs_sub','Subtitle under “Designs”')]},
   {kind:'list',table:'designs',title:'Designs (each has its own story page)',tk:'name',pub:1,slug:1,fields:[
@@ -62,6 +63,7 @@ function ctl(f,v){
  case 'paras':c=`<textarea id="${id}" rows="5">${esc([].concat(v||[]).join('\n\n'))}</textarea>`;break;
  case 'color':{const d=v||(f.k.startsWith('theme.')?getComputedStyle(document.documentElement).getPropertyValue('--'+f.k.slice(6)).trim():'')||'#5aa2ff';c=`<input id="${id}" type="color" value="${esc(d)}">`;break}
  case 'img':case 'file':c=`<div class="img" data-folder="${f.folder||'misc'}" data-kind="${f.t}">${f.t==='img'?`<img alt="" ${v?`src="${esc(abs(v))}"`:''}>`:`<a ${v?`href="${esc(abs(v))}"`:''} target="_blank">${v?'Current file':'No file yet'}</a>`}<input type="hidden" value="${esc(v)}"><input type="file" accept="${f.t==='img'?'image/jpeg,image/png,image/webp,image/gif':'application/pdf'}"><button type="button" class="ic" data-clear>Remove</button><span class="st"></span></div>`;break;
+ case 'media':{const vid=isVid(v);c=`<div class="img" data-folder="${f.folder||'misc'}" data-kind="media"><img alt="" ${v&&!vid?`src="${esc(abs(v))}"`:'hidden'}><video muted controls preload="metadata" style="width:170px;height:96px;border-radius:8px;background:#000" ${v&&vid?`src="${esc(abs(v))}"`:'hidden'}></video><input type="hidden" value="${esc(v)}"><input type="file" accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm"><button type="button" class="ic" data-clear>Remove</button><span class="st"></span></div>`;break}
  case 'rep':reps[f.k]=f;c=`<div class="rep">${(v||[]).map(x=>repi(f,x)).join('')}</div><button type="button" class="btn" data-addrep>+ Add chapter</button>`;break;
  default:c=`<input id="${id}" type="${f.t==='email'?'email':'text'}" value="${esc(v)}">`}
  return `<div class="fld" data-f="${f.k}">${lab}${c}${hint}<em class="err"></em></div>`}
@@ -71,7 +73,7 @@ function val(w,f){const q=s=>$(s,w);switch(f.t){
  case 'bool':return q('input').checked;
  case 'list':return q('textarea').value.split('\n').map(s=>s.trim()).filter(Boolean);
  case 'paras':return q('textarea').value.split(/\n{2,}/).map(s=>s.trim()).filter(Boolean);
- case 'img':case 'file':return q('input[type=hidden]').value;
+ case 'img':case 'file':case 'media':return q('input[type=hidden]').value;
  case 'rep':return $$(':scope > .rep > .repi',w).map(i=>read(i,f.sub));
  default:return q('input,textarea').value.trim()}}
 const fld=(root,k)=>$$(':scope > .fld, :scope > .grid > .fld',root).find(e=>e.dataset.f===k)||null;
@@ -133,22 +135,24 @@ async function media(b,host){
  const card=html('<section class="card"><h3>Media library</h3><p>Everything you uploaded. Delete only files no page uses any more.</p><div class="media"></div></section>');host.append(card);
  for(const f of['profile','projects','designs','resume','seo','misc']){const {data}=await sb.storage.from('media').list(f,{limit:100});
   (data||[]).filter(o=>o.name&&o.id!==null).forEach(o=>{const p=`${f}/${o.name}`,u=sb.storage.from('media').getPublicUrl(p).data.publicUrl;
-   const d=html(`<div>${/\.pdf$/i.test(o.name)?'📄':`<img src="${esc(u)}" alt="">`}<br>${esc(o.name)}<br><button class="ic danger">Delete</button></div>`);
+   const d=html(`<div>${/\.pdf$/i.test(o.name)?'📄':isVid(o.name)?'🎬':`<img src="${esc(u)}" alt="">`}<br>${esc(o.name)}<br><button class="ic danger">Delete</button></div>`);
    $('button',d).onclick=async()=>{if(!await ask(`Delete ${o.name}?`))return;const r=await sb.storage.from('media').remove([p]);r.error?toast(r.error.message,'err'):(d.remove(),toast('Deleted'))};$('.media',card).append(d)})}}
 
 /* uploads, repeaters, clear buttons, dirty tracking (event delegation) */
 function wire(main){
  main.addEventListener('input',()=>dirty=true);
  main.addEventListener('change',async e=>{const inp=e.target;if(inp.type!=='file'||!inp.files[0])return;const box=inp.closest('.img'),f=inp.files[0],st=$('.st',box);
-  if(f.size>5*1048576){inp.value='';return toast('File is over 5 MB','err')}
-  const path=`${box.dataset.folder}/${Date.now()}-${f.name.toLowerCase().replace(/[^a-z0-9.]+/g,'-')}`;st.textContent='Uploading…';
+  const kd=box.dataset.kind,okT=kd==='file'?f.type==='application/pdf':/^image\/(jpeg|png|webp|gif)$/.test(f.type)||(kd==='media'&&/^video\/(mp4|webm)$/.test(f.type));
+  if(!okT){inp.value='';return toast(kd==='media'?'Use a JPG, PNG, WebP or GIF image, or an MP4 / WebM video':kd==='file'?'Please choose a PDF file':'Please choose a JPG, PNG, WebP or GIF image','err')}
+  const vidf=f.type.startsWith('video/'),lim=10;if(f.size>lim*1048576){inp.value='';return toast(`This file is over ${lim} MB. Images, videos and PDFs are limited to ${lim} MB. Please compress it and try again.`,'err')}
+  const path=`${box.dataset.folder}/${Date.now()}-${f.name.toLowerCase().replace(/[^a-z0-9.]+/g,'-')}`;st.textContent=vidf?'Uploading video… this can take a minute':'Uploading…';
   const {error}=await sb.storage.from('media').upload(path,f,{contentType:f.type,upsert:false});
   if(error){st.textContent='';return toast('Upload failed: '+error.message,'err')}
   const url=sb.storage.from('media').getPublicUrl(path).data.publicUrl;$('input[type=hidden]',box).value=url;
-  if(box.dataset.kind==='img')$('img',box).src=url;else{const a=$('a',box);a.href=url;a.textContent='New file (not saved yet)'}
+  if(box.dataset.kind==='img')$('img',box).src=url;else if(box.dataset.kind==='media'){const im=$('img',box),vd=$('video',box);im.hidden=vidf;vd.hidden=!vidf;(vidf?vd:im).src=url}else{const a=$('a',box);a.href=url;a.textContent='New file (not saved yet)'}
   st.textContent='Uploaded. Click Save to publish it.';dirty=true});
  main.addEventListener('click',e=>{const t=e.target;
-  if(t.dataset.clear!==undefined){const b=t.closest('.img');$('input[type=hidden]',b).value='';const im=$('img',b);if(im)im.removeAttribute('src');dirty=true}
+  if(t.dataset.clear!==undefined){const b=t.closest('.img');$('input[type=hidden]',b).value='';const im=$('img',b);if(im)im.removeAttribute('src');const vd=$('video',b);if(vd)vd.removeAttribute('src');dirty=true}
   if(t.dataset.addrep!==undefined){const f=reps[t.closest('.fld').dataset.f];$('.rep',t.closest('.fld')).append(html(repi(f,{})));dirty=true}
   if(t.dataset.rm!==undefined){t.closest('.repi').remove();dirty=true}
   if(t.dataset.mv){const r=t.closest('.repi'),s=t.dataset.mv==='-1'?r.previousElementSibling:r.nextElementSibling;if(s)t.dataset.mv==='-1'?s.before(r):s.after(r);dirty=true}})}
