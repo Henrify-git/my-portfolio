@@ -105,9 +105,9 @@ insert into public.site_settings (id) values (1) on conflict do nothing;
 
 -- Storage bucket for uploads (public files, admin-only changes) ------------
 insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
-values ('media','media',true,5242880, array['image/jpeg','image/png','image/webp','image/gif','application/pdf'])
-on conflict (id) do update set public = true, file_size_limit = 5242880,
-  allowed_mime_types = array['image/jpeg','image/png','image/webp','image/gif','application/pdf'];
+values ('media','media',true,10485760, array['image/jpeg','image/png','image/webp','image/gif','application/pdf','video/mp4','video/webm'])
+on conflict (id) do update set public = true, file_size_limit = 10485760,
+  allowed_mime_types = array['image/jpeg','image/png','image/webp','image/gif','application/pdf','video/mp4','video/webm'];
 drop policy if exists "media admin read"   on storage.objects;
 drop policy if exists "media admin insert" on storage.objects;
 drop policy if exists "media admin update" on storage.objects;
