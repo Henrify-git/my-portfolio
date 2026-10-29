@@ -14,7 +14,8 @@ const ask=m=>new Promise(r=>{const d=$('#dlg');$('p',d).textContent=m;d.returnVa
 const get=(o,k)=>k.split('.').reduce((a,p)=>a==null?a:a[p],o);
 
 /* ---------- WHAT EACH SECTION EDITS ---------- */
-const T=(k,l,o={})=>({k,l,t:'text',...o}),A=(k,l,o={})=>({k,l,t:'area',...o}),I=(k,l,f,o={})=>({k,l,t:'img',folder:f,...o});
+const T=(k,l,o={})=>({k,l,t:'text',...o}),A=(k,l,o={})=>({k,l,t:'area',...o}),I=(k,l,f,o={})=>({k,l,t:'img',folder:f,...o}),M=(k,l,f,o={})=>({k,l,t:'media',folder:f,...o});
+const DEFH='Image (JPG, PNG, WebP, GIF) or video (MP4, WebM). Max 10 MB. Videos play muted on a loop.';
 const B=(k,l,o={})=>({k,l,t:'bool',...o});
 const SECTIONS={
  overview:{title:'Overview',custom:overview},
@@ -23,7 +24,7 @@ const SECTIONS={
   T('signature','Signature handwriting'),T('badge_avail','Availability status'),A('badge_mini','Badge corner text'),T('badge_id','Badge ID'),T('handle','Handle (badge back)'),T('badge_tag','Badge tagline'),
   {k:'typed_hero',l:'Hero typed lines',t:'list',r:1,h:'One per line'},{k:'corners',l:'Hero floating words',t:'list',n:4,h:'Exactly 4, one per line'},
   T('intro_heading','Intro headline',{r:1}),A('intro_text','Introduction'),
-  I('profile_photo','Profile picture (ID badge)','profile'),I('intro_photo','Hero image','profile'),I('intro_shot','Hero screenshot','profile'),A('cta','Closing call-to-action heading')]}]},
+  M('profile_photo','Profile picture or video (ID badge)','profile'),M('intro_photo','Hero image or video','profile'),M('intro_shot','Hero screenshot or video','profile'),A('cta','Closing call-to-action heading')]}]},
  projects:{title:'Projects',blocks:[
   {kind:'single',table:'profile',title:'Section subtitle',fields:[T('work_sub','Subtitle under “Selected work”')]},
   {kind:'list',table:'projects',title:'Projects (sliding cards)',tk:'name',pub:1,fields:[T('name','Title',{r:1}),T('category','Category'),{k:'image_url',l:'Cover image or video',t:'media',folder:'projects',h:'Image (JPG, PNG, WebP, GIF) or video (MP4, WebM). Maximum 10 MB each. Videos play muted on a loop.'},T('url','Project link',{t:'url'}),B('tall','Phone-shaped card')]}]},
@@ -31,9 +32,9 @@ const SECTIONS={
   {kind:'single',table:'profile',title:'Section subtitle',fields:[T('designs_sub','Subtitle under “Designs”')]},
   {kind:'list',table:'designs',title:'Designs (each has its own story page)',tk:'name',pub:1,slug:1,fields:[
    T('name','Name',{r:1}),T('slug','Page address (slug)',{t:'slug',r:1,h:'lowercase-with-dashes, unique'}),T('kind','Type (Website, Mobile app…)'),A('summary','Short description',{r:1}),
-   I('image_url','Cover image','designs'),T('role','My role'),T('year','Year'),T('tools','Tools'),T('live_url','Live website / app link',{t:'url',r:1}),T('live_label','Button text'),B('featured','Featured'),
-   {k:'story',l:'Story chapters (text + optional image)',t:'rep',sub:[T('title','Chapter title',{r:1}),{k:'text',l:'Text (blank line = new paragraph)',t:'paras'},I('image','Chapter image','designs')]}]}]},
- about:{title:'About Me',blocks:[{kind:'single',table:'profile',title:'About section',fields:[T('about_tag','Badge text'),A('about_text','Biography'),{k:'about_list',l:'Highlights',t:'list',h:'One per line'},I('about_photo','About photo','profile')]}]},
+   M('image_url','Cover image or video','designs'),T('role','My role'),T('year','Year'),T('tools','Tools'),T('live_url','Live website / app link',{t:'url',r:1}),T('live_label','Button text'),B('featured','Featured'),
+   {k:'story',l:'Story chapters (text + optional image)',t:'rep',sub:[T('title','Chapter title',{r:1}),{k:'text',l:'Text (blank line = new paragraph)',t:'paras'},M('image','Chapter image or video','designs')]}]}]},
+ about:{title:'About Me',blocks:[{kind:'single',table:'profile',title:'About section',fields:[T('about_tag','Badge text'),A('about_text','Biography'),{k:'about_list',l:'Highlights',t:'list',h:'One per line'},M('about_photo','About photo','profile')]}]},
  skills:{title:'Skills and Services',blocks:[
   {kind:'list',table:'roles',title:'Roles / services',tk:'title',pub:1,fields:[T('title','Role',{r:1}),T('description','Short description'),{k:'color',l:'Icon color',t:'color'},T('icon','Icon symbol')]},
   {kind:'list',table:'stats',title:'Statistics',tk:'label',fields:[T('value','Number (e.g. 50+)',{r:1}),T('label','Label')]},
@@ -47,7 +48,7 @@ const SECTIONS={
   {kind:'single',table:'site_settings',title:'Colors',theme:1,fields:[['hero-dark','Hero / dark sections'],['hero-light','Hero glow and button hover'],['surface','Light section background'],['surface-2','Light section gradient end'],['surface-strong','Hero floating words'],['surface-light','Designs section background'],['ink','Headings and buttons'],['text','Body text'],['accent','Accent'],['accent-bright','Accent (on dark)'],['highlight','Highlight (strip dots, focus)']].map(([k,l])=>({k:'theme.'+k,l,t:'color'}))},
   {kind:'single',table:'site_settings',title:'Labels and headings',fields:[T('labels.nav_work','Nav: Work'),T('labels.nav_designs','Nav: Designs'),T('labels.nav_about','Nav: About'),T('labels.nav_cta','Nav: contact button'),T('labels.work_title','Heading: Selected work'),T('labels.designs_title','Heading: Designs'),T('labels.about_title','Heading: About me'),T('labels.contact_btn','Contact button label'),T('labels.quote_btn','Quote button label'),T('labels.copyright','Footer / copyright text')]}]},
  sections:{title:'Navigation and Sections',blocks:[{kind:'single',table:'site_settings',title:'Show or hide sections',help:'Section order is fixed by the design. Hidden sections also disappear from the navigation.',fields:['intro','roles','stats','work','designs','about','contact'].map(k=>B('sections.'+k,{intro:'Intro',roles:'Roles',stats:'Statistics + tools strip',work:'Selected work',designs:'Designs',about:'About',contact:'Contact'}[k],{d:1}))}]},
- seo:{title:'SEO and Metadata',blocks:[{kind:'single',table:'site_settings',title:'Search and sharing',help:'Applied when the page loads in a browser.',fields:[T('seo.title','Page title'),A('seo.description','Description'),I('seo.og_image','Social sharing image','seo')]}]},
+ seo:{title:'SEO and Metadata',blocks:[{kind:'single',table:'site_settings',title:'Search and sharing',help:'Applied when the page loads in a browser.',fields:[T('seo.title','Page title'),A('seo.description','Description'),I('seo.og_image','Social sharing image','seo',{h:'Image only (JPG, PNG, WebP, GIF), max 10 MB. Social sites do not show videos.'})]}]},
  settings:{title:'Settings',custom:settings}
 };
 const ORDER=Object.keys(SECTIONS);
@@ -55,7 +56,7 @@ const ORDER=Object.keys(SECTIONS);
 /* ---------- FORM ENGINE ---------- */
 const reps={};
 function ctl(f,v){
- const id='f_'+f.k.replace(/\W/g,'_'),lab=`<label for="${id}">${f.l}${f.r?' *':''}</label>`,hint=f.h?`<small>${f.h}</small>`:'';let c;
+ const id='f_'+f.k.replace(/\W/g,'_'),lab=`<label for="${id}">${f.l}${f.r?' *':''}</label>`,hint=(f.h||f.t==='media')?`<small>${f.h||DEFH}</small>`:'';let c;
  switch(f.t){
  case 'bool':return `<div class="fld" data-f="${f.k}"><label class="chk"><input type="checkbox" ${(f.d?v!==false:!!v)?'checked':''}> ${f.l}</label><em class="err"></em></div>`;
  case 'area':c=`<textarea id="${id}" rows="3">${esc(v)}</textarea>`;break;
