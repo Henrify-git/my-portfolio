@@ -55,4 +55,10 @@ Profile and hero, ID badge, projects (add / edit / duplicate / delete / reorder 
 - **"Preview website"** opens the live site; color changes preview inside the dashboard before you save.
 - Content loads in the visitor's browser, so changes appear on the next page load (no redeploy). Search engines that don't run JavaScript see the built-in fallback text and default title.
 - If Supabase is down or paused (free projects pause after inactivity), the site shows the content from `src/data/portfolio.js`. Keep that file reasonably up to date as a backup.
-- Uploads: images (JPG/PNG/WebP/GIF) and PDF, max 5 MB.
+- Uploads: images (JPG/PNG/WebP/GIF), PDFs, and videos (MP4/WebM, Selected work cards only) are all limited to 10 MB each.
+- **Upgrading an existing project to allow videos:** run once in SQL Editor:
+```sql
+update storage.buckets set file_size_limit = 10485760,
+  allowed_mime_types = array['image/jpeg','image/png','image/webp','image/gif','application/pdf','video/mp4','video/webm']
+where id = 'media';
+```
