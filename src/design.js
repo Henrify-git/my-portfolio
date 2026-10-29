@@ -5,7 +5,8 @@ $('.logo').textContent=P.logo;
 const slug=new URLSearchParams(location.search).get('d');
 const i=P.designs.findIndex(x=>x.slug===slug),d=P.designs[i],root=$('#design');
 if(!d){root.innerHTML='<div class="sub-wrap sub-head"><h1>Design not found</h1><p class="lead">Check that the link matches a "slug" in src/data/portfolio.js.</p><a class="b fill" href="index.html#designs">Back to designs</a></div>';return}
-const pic=(src,cls)=>src?`<figure class="${cls} ph"><img src="${src}" alt="" onerror="this.remove()"></figure>`:'';
+const isV=u=>/\.(mp4|webm)(\?.*)?$/i.test(u||'');
+const pic=(src,cls)=>!src?'':`<figure class="${cls} ph">${isV(src)?`<video src="${src}" muted loop playsinline preload="metadata" onerror="this.remove()"></video>`:`<img src="${src}" alt="" onerror="this.remove()">`}</figure>`;
 const label=d.liveLabel||'View live website',next=P.designs[(i+1)%P.designs.length];
 document.title=d.name+' – '+P.name;
 const live=(c)=>`<a class="b fill ${c||''}" href="${d.liveUrl}" target="_blank" rel="noopener">${label} \u2197</a>`;
@@ -17,6 +18,8 @@ root.innerHTML=`
 <div class="sub-wrap story">${d.story.map((s,n)=>`<section class="chap rv ${n%2?'flip':''}"><div><h2>${s.title}</h2>${[].concat(s.text).map(t=>`<p>${t}</p>`).join('')}</div>${pic(s.image,'cimg')}</section>`).join('')}</div>
 <section class="sub-wrap live rv"><h2>See it live</h2>${live('big')}</section>
 <a class="next sub-wrap" href="design.html?d=${encodeURIComponent(next.slug)}"><span>Next design</span><h3>${next.name}</h3></a>`;
+const calm=matchMedia('(prefers-reduced-motion: reduce)').matches,vio=new IntersectionObserver(es=>es.forEach(e=>{if(calm)return;e.isIntersecting?e.target.play().catch(()=>{}):e.target.pause()}),{threshold:.4});
+document.querySelectorAll('figure video').forEach(v=>{if(calm)v.controls=true;vio.observe(v);v.parentElement.addEventListener('mouseenter',()=>v.play().catch(()=>{}))});
 const io=new IntersectionObserver(es=>es.forEach(e=>e.isIntersecting&&e.target.classList.add('in')),{threshold:.15});
 document.querySelectorAll('.rv').forEach(e=>io.observe(e));
 })();

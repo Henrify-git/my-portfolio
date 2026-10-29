@@ -1,8 +1,18 @@
 /* Page logic. You normally never need to edit this file: content lives in src/data/portfolio.js. */
 const CONFIG=window.PORTFOLIO;
+/* Project cover can be an image or a short video (MP4/WebM). */
+const isVideo=u=>/\.(mp4|webm)(\?.*)?$/i.test(u||'');
+const mediaTag=(u,alt)=>!u?'':isVideo(u)?`<video src="${u}" muted loop playsinline preload="metadata" aria-label="${alt}" onerror="this.remove()"></video>`:`<img src="${u}" alt="${alt}" onerror="this.remove()">`;
 const $=s=>document.querySelector(s);
+/* Videos in ANY image slot: muted, looping, play while visible; hover also plays. Reduced-motion users get controls. */
+const calmMotion=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const vio=new IntersectionObserver(es=>es.forEach(e=>{if(calmMotion)return;e.isIntersecting?e.target.play().catch(()=>{}):e.target.pause()}),{threshold:.4});
+const watchVideo=v=>{if(calmMotion)v.controls=true;vio.observe(v);v.parentElement.addEventListener('mouseenter',()=>v.play().catch(()=>{}))};
 /* Loads an image; if the file is missing the placeholder stays visible. */
-const img=(el,src,alt)=>{if(!src)return;const i=new Image();i.alt=alt||'';i.onload=()=>{el.textContent='';el.appendChild(i)};i.src=src};
+const img=(el,src,alt)=>{if(!src)return;
+ if(isVideo(src)){const v=document.createElement('video');v.muted=true;v.loop=true;v.playsInline=true;v.preload='auto';v.setAttribute('aria-label',alt||'');
+  v.onloadedmetadata=()=>{el.textContent='';el.appendChild(v);watchVideo(v)};v.src=src;return}
+ const i=new Image();i.alt=alt||'';i.onload=()=>{el.textContent='';el.appendChild(i)};i.src=src};
 $('.logo').textContent=CONFIG.logo;
 img($('#badgePhoto'),CONFIG.profilePhoto,CONFIG.name);img($('#introPhoto'),CONFIG.introPhoto,'');img($('#introShot'),CONFIG.introShot,'');img($('#aboutPhoto'),CONFIG.aboutPhoto,'');
 $('#badgeName').textContent=CONFIG.name.split(' ')[0].toUpperCase();$('#badgeRole').innerHTML=CONFIG.badgeRole;
@@ -15,9 +25,9 @@ $('#roles').innerHTML=CONFIG.roles.map(r=>`<div class="role rv"><div class="ic" 
 $('#stats').innerHTML=CONFIG.stats.map(s=>`<div class="stat rv"><b>${s[0]}</b><span>${s[1]}</span></div>`).join('');
 const tl=CONFIG.tools.map(t=>`<em>✦</em><span>${t}</span>`).join('');$('#mq').innerHTML=tl+tl+tl+tl;
 $('#workSub').textContent=CONFIG.workSub;
-$('#track').innerHTML=CONFIG.projects.map(p=>`<a class="card ${p.tall?'tall':''}" href="${p.url}"><div class="shot ph"><span class="ph-label">${p.n}</span>${p.img?`<img src="${p.img}" alt="${p.n}" onerror="this.remove()">`:''}</div><div class="meta"><b>${p.n}</b><span>${p.k}</span></div></a>`).join('');
+$('#track').innerHTML=CONFIG.projects.map(p=>`<a class="card ${p.tall?'tall':''}" href="${p.url}"><div class="shot ph"><span class="ph-label">${p.n}</span>${mediaTag(p.img,p.n)}</div><div class="meta"><b>${p.n}</b><span>${p.k}</span></div></a>`).join('');
 $('#designsSub').textContent=CONFIG.designsSub;
-$('#designList').innerHTML=CONFIG.designs.map(d=>`<a class="drow" href="design.html?d=${encodeURIComponent(d.slug)}"><div class="dthumb ph"><span class="ph-label">${d.name}</span>${d.image?`<img src="${d.image}" alt="" onerror="this.remove()">`:''}</div><div class="dtxt"><h3>${d.name}</h3><p>${d.summary}</p></div><span class="dkind">${d.kind}</span><em>\u2197</em></a>`).join('');
+$('#designList').innerHTML=CONFIG.designs.map(d=>`<a class="drow" href="design.html?d=${encodeURIComponent(d.slug)}"><div class="dthumb ph"><span class="ph-label">${d.name}</span>${mediaTag(d.image,d.name)}</div><div class="dtxt"><h3>${d.name}</h3><p>${d.summary}</p></div><span class="dkind">${d.kind}</span><em>\u2197</em></a>`).join('');
 $('#aboutTag').textContent=CONFIG.aboutTag;$('#aboutP').textContent=CONFIG.aboutText;
 $('#aboutList').innerHTML=CONFIG.aboutList.map(l=>`<li>${l}</li>`).join('');
 $('#cta').innerHTML=CONFIG.cta;
@@ -55,3 +65,6 @@ $('#badge').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.pr
 (function(){const B=CONFIG.introButtons||{},box=$('#introBtns');if(!box)return;
  const items=[['email',CONFIG.email?'mailto:'+CONFIG.email:'',B.emailLabel||'Email me','\u2709'],['linkedin',B.linkedinUrl,B.linkedinLabel||'LinkedIn','in'],['calendly',B.calendlyUrl,B.calendlyLabel||'Book a call','\u25F7']].filter(x=>x[1]);
  box.innerHTML=items.map(([k,u,l,i])=>`<a class="ibtn ${k}" href="${u}" ${k==='email'?'':'target="_blank" rel="noopener"'}><span aria-hidden="true">${i}</span>${l}</a>`).join('')})();
+
+/* Videos created from markup (project cards, design thumbnails) */
+document.querySelectorAll('#track video,#designList video').forEach(watchVideo);
